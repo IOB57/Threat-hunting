@@ -1,0 +1,74 @@
+title: Encoded PowerShell Execution From Suspicious Parent
+id: 9c4f1b88-8a61-45d2-b9d7-1e7c3a5f2219
+
+status: experimental
+
+description:
+    Detects encoded PowerShell commands executed by non-interactive or unusual parent processes.
+
+author:
+    Detection Engineering Lab
+
+date:
+    2026/08/04
+
+
+tags:
+
+    - attack.execution
+    - attack.command_and_scripting_interpreter
+    - attack.t1059.001
+
+
+
+logsource:
+
+    product: windows
+    category: process_creation
+
+
+
+detection:
+
+
+    powershell:
+
+        Image|endswith:
+
+            - '\powershell.exe'
+            - '\pwsh.exe'
+
+
+        CommandLine|contains:
+
+            - '-enc'
+            - '-encodedcommand'
+            - 'FromBase64String'
+
+
+    suspicious_parent:
+
+        ParentImage|endswith:
+
+            - '\wmiprvse.exe'
+            - '\services.exe'
+            - '\winword.exe'
+            - '\excel.exe'
+            - '\mshta.exe'
+
+
+    condition:
+
+        powershell and suspicious_parent
+
+
+
+falsepositives:
+
+    - Automation scripts
+    - Deployment systems
+
+
+level:
+
+    high
