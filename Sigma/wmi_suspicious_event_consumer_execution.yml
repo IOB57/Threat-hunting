@@ -1,0 +1,42 @@
+title: Suspicious WMI Event Consumer Spawning Command Interpreter
+id: 8c4a6b91-6f8d-4d44-a5f3-2f1c4f7c91aa
+status: experimental
+description: Detects suspicious processes spawned by WMI Provider Host which may indicate malicious WMI Event Subscription persistence.
+author: Detection Engineering Lab
+date: 2026/08/04
+references:
+    - https://attack.mitre.org/techniques/T1546/003/
+
+tags:
+    - attack.persistence
+    - attack.execution
+    - attack.t1546.003
+
+logsource:
+    category: process_creation
+    product: windows
+
+detection:
+
+    selection_parent:
+        ParentImage|endswith:
+            - '\wmiprvse.exe'
+
+    selection_child:
+        Image|endswith:
+            - '\powershell.exe'
+            - '\cmd.exe'
+            - '\rundll32.exe'
+            - '\regsvr32.exe'
+            - '\mshta.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+
+    condition:
+        selection_parent and selection_child
+
+falsepositives:
+    - Legitimate enterprise WMI automation
+    - Monitoring solutions
+
+level: high
