@@ -1,0 +1,64 @@
+title: Suspicious Parent Process Spawning Command Shell
+id: 8f31d7c9-7b55-4a82-a1e5-5d7c2f991233
+
+status: experimental
+
+description:
+    Detects command shell execution from uncommon Windows processes that are frequently abused by attackers.
+
+author:
+    Detection Engineering Lab
+
+date:
+    2026/08/04
+
+
+tags:
+
+    - attack.execution
+
+
+logsource:
+
+    product: windows
+    category: process_creation
+
+
+
+detection:
+
+
+    suspicious_parent:
+
+        ParentImage|endswith:
+
+            - '\wmiprvse.exe'
+            - '\dllhost.exe'
+            - '\spoolsv.exe'
+            - '\msdt.exe'
+            - '\winword.exe'
+            - '\excel.exe'
+
+
+    cmd:
+
+        Image|endswith:
+
+            - '\cmd.exe'
+
+
+    condition:
+
+        suspicious_parent and cmd
+
+
+
+falsepositives:
+
+    - Management scripts
+    - Legacy applications
+
+
+level:
+
+    high
