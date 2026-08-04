@@ -1,0 +1,104 @@
+title: Scheduled Task Launching Network Download Utility
+id: 7a82c4d1-9f33-41b8-a922-5d7c6e991522
+
+status: experimental
+
+
+description:
+
+    Detects scheduled tasks that execute network utilities commonly used for malware download and staging.
+
+
+author:
+
+    Detection Engineering Lab
+
+
+date:
+
+    2026/08/04
+
+
+
+tags:
+
+    - attack.persistence
+    - attack.execution
+    - attack.t1053.005
+    - attack.t1105
+
+
+
+logsource:
+
+
+    product: windows
+    category: process_creation
+
+
+
+detection:
+
+
+
+    scheduled_task:
+
+
+        ParentImage|endswith:
+
+
+            - '\svchost.exe'
+
+
+        ParentCommandLine|contains:
+
+
+            - 'Schedule'
+
+
+
+    network_tools:
+
+
+        Image|endswith:
+
+
+            - '\curl.exe'
+            - '\bitsadmin.exe'
+            - '\certutil.exe'
+            - '\powershell.exe'
+
+
+
+    download_activity:
+
+
+        CommandLine|contains:
+
+
+            - 'http://'
+            - 'https://'
+            - 'DownloadString'
+            - 'Start-BitsTransfer'
+
+
+
+    condition:
+
+
+        scheduled_task and network_tools and download_activity
+
+
+
+falsepositives:
+
+
+    - Software update tasks
+    - Enterprise automation
+
+
+
+level:
+
+
+    high
