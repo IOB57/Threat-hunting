@@ -1,0 +1,56 @@
+title: Image File Execution Options Debugger Modification
+id: e4c9b6c7-3e6c-41d2-a8cb-4b5b7e8e5512
+
+status: experimental
+
+description:
+    Detects modifications to Image File Execution Options registry keys used for persistence and execution hijacking.
+
+author:
+    Detection Engineering Lab
+
+date:
+    2026/08/04
+
+
+tags:
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.t1546.012
+
+
+logsource:
+
+    product: windows
+    category: registry_event
+
+
+detection:
+
+
+    selection:
+
+        TargetObject|contains:
+
+            - '\Image File Execution Options\'
+
+        Details|contains:
+
+            - 'Debugger'
+            - 'GlobalFlag'
+
+
+    condition:
+
+        selection
+
+
+falsepositives:
+
+    - Application debugging
+    - Developer environments
+
+
+level:
+
+    high
