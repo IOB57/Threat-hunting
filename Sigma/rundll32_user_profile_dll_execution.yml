@@ -1,0 +1,70 @@
+title: Rundll32 Loading DLL From User Writable Directory
+id: 6b2d9a44-2a71-4d7f-b7c2-5f1a8e991233
+
+status: experimental
+
+
+description:
+
+    Detects rundll32 execution where the loaded DLL originates from user writable locations.
+
+author:
+
+    Detection Engineering Lab
+
+date:
+
+    2026/08/04
+
+
+
+tags:
+
+    - attack.defense_evasion
+    - attack.t1218.011
+
+
+
+logsource:
+
+    product: windows
+    category: process_creation
+
+
+
+detection:
+
+
+    rundll32:
+
+        Image|endswith:
+
+            - '\rundll32.exe'
+
+
+    suspicious_dll:
+
+        CommandLine|contains:
+
+            - '\Users\'
+            - '\AppData\'
+            - '\Downloads\'
+            - '\Temp\'
+            - '\Desktop\'
+
+
+    condition:
+
+        rundll32 and suspicious_dll
+
+
+
+falsepositives:
+
+    - User-installed software
+    - Enterprise applications
+
+
+level:
+
+    medium
