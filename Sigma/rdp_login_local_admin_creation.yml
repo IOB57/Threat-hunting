@@ -1,0 +1,100 @@
+title: RDP Logon Followed By Local Administrator Creation
+id: 6f91c2d4-8b22-4a77-a911-3d5e7c992411
+
+status: experimental
+
+
+description:
+
+    Detects account creation and privilege escalation shortly after an RDP interactive logon.
+
+
+author:
+
+    Detection Engineering Lab
+
+
+date:
+
+    2026/08/04
+
+
+
+tags:
+
+    - attack.persistence
+    - attack.t1078
+    - attack.t1098
+
+
+
+logsource:
+
+
+    product: windows
+    service: security
+
+
+
+detection:
+
+
+
+    rdp_login:
+
+
+        EventID: 4624
+
+
+        LogonType: 10
+
+
+
+    user_created:
+
+
+        EventID:
+
+            - 4720
+
+
+
+    admin_group_added:
+
+
+        EventID:
+
+            - 4732
+
+
+        TargetUserName|contains:
+
+            - 'Administrators'
+
+
+
+    timeframe:
+
+        seconds: 600
+
+
+
+    condition:
+
+
+        rdp_login followed_by user_created followed_by admin_group_added
+
+
+
+falsepositives:
+
+
+    - Helpdesk operations
+    - Administrator onboarding
+
+
+
+level:
+
+
+    high
