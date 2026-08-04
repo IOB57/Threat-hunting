@@ -1,0 +1,65 @@
+title: Windows Service Executing From User Writable Directory
+id: 2e8a7f41-5c91-42d7-a811-7b6c9e991399
+
+status: experimental
+
+description:
+    Detects Windows services configured to execute binaries from suspicious user writable directories.
+
+author:
+    Detection Engineering Lab
+
+date:
+    2026/08/04
+
+
+tags:
+
+    - attack.persistence
+    - attack.t1543.003
+
+
+logsource:
+
+    product: windows
+    service: system
+
+
+
+detection:
+
+
+    service_creation:
+
+        EventID: 7045
+
+
+
+    suspicious_path:
+
+        ImagePath|contains:
+
+
+            - '\Users\'
+            - '\AppData\'
+            - '\Temp\'
+            - '\Downloads\'
+            - '\Desktop\'
+
+
+    condition:
+
+        service_creation and suspicious_path
+
+
+
+falsepositives:
+
+
+    - Poorly designed applications
+    - Internal tools
+
+
+level:
+
+    high
