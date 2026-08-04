@@ -1,0 +1,71 @@
+title: First Time Seen LOLBin Execution In Environment
+id: 5b91c7e2-44a1-47d9-b822-6f8a1c991466
+
+status:
+
+    experimental
+
+
+description:
+
+    Detects execution of uncommon Windows LOLBins that have not been observed in the environment baseline.
+
+author:
+
+    Detection Engineering Lab
+
+date:
+
+    2026/08/04
+
+
+tags:
+
+    - attack.defense_evasion
+    - attack.t1218
+
+
+
+logsource:
+
+    product: windows
+    category: process_creation
+
+
+
+detection:
+
+
+    lolbins:
+
+
+        Image|endswith:
+
+
+            - '\regsvr32.exe'
+            - '\mshta.exe'
+            - '\installutil.exe'
+            - '\msbuild.exe'
+            - '\cmstp.exe'
+            - '\odbcconf.exe'
+            - '\rundll32.exe'
+
+
+    condition:
+
+
+        lolbins
+
+
+
+falsepositives:
+
+
+    - Developer environments
+    - Software deployment tools
+
+
+level:
+
+
+    medium
