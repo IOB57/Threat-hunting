@@ -1,0 +1,60 @@
+title: SilentProcessExit Registry Persistence Via MonitorProcess
+id: 3e7d2c89-7f8a-4a91-9e7d-3d7a8c5b9211
+status: experimental
+
+description:
+    Detects modifications to SilentProcessExit registry keys used to execute attacker-controlled processes when a monitored process exits.
+
+author:
+    Detection Engineering Lab
+
+date: 2026/08/04
+
+references:
+    - https://attack.mitre.org/techniques/T1546/
+
+tags:
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.t1546
+
+
+logsource:
+    product: windows
+    category: registry_event
+
+
+detection:
+
+    selection:
+
+        TargetObject|contains:
+            - '\SilentProcessExit\'
+
+        TargetObject|endswith:
+            - '\MonitorProcess'
+            - '\ReportingMode'
+            - '\GlobalFlag'
+
+
+    suspicious_path:
+
+        Details|contains:
+            - '\Users\'
+            - '\AppData\'
+            - '\Temp\'
+            - '\ProgramData\'
+
+
+    condition:
+
+        selection and suspicious_path
+
+
+falsepositives:
+
+    - Application debugging
+    - Developer troubleshooting
+
+
+level: high
