@@ -1,0 +1,48 @@
+title: Scheduled Task Created Executing LOLBin
+id: 3e19c3a8-65a7-45b7-b1cb-9b92c0a7c421
+status: experimental
+
+description:
+    Detects scheduled tasks executing Windows LOLBins commonly abused for persistence.
+
+author: Detection Engineering Lab
+date: 2026/08/04
+
+
+tags:
+    - attack.persistence
+    - attack.execution
+    - attack.t1053.005
+
+
+logsource:
+    product: windows
+    service: security
+
+
+detection:
+
+    task_creation:
+        EventID:
+            - 4698
+            - 4702
+
+    lolbin:
+        TaskContent|contains:
+            - 'powershell.exe'
+            - 'cmd.exe'
+            - 'mshta.exe'
+            - 'rundll32.exe'
+            - 'regsvr32.exe'
+            - 'wscript.exe'
+
+
+    condition:
+        task_creation and lolbin
+
+
+falsepositives:
+    - Enterprise automation
+    - Administrative scripts
+
+level: medium
