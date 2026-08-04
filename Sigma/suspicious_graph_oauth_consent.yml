@@ -1,0 +1,67 @@
+title: Suspicious OAuth Application Consent Granted
+id: 74d2f9a1-3c88-4a5b-b711-8e5d2c991355
+
+status: experimental
+
+description:
+    Detects potentially malicious OAuth application consent events that may provide persistent cloud access.
+
+author:
+    Detection Engineering Lab
+
+date:
+    2026/08/04
+
+
+tags:
+
+    - attack.persistence
+    - attack.credential_access
+    - attack.t1528
+
+
+logsource:
+
+    product: azure
+    service: auditlogs
+
+
+
+detection:
+
+
+    consent_event:
+
+        Operation|contains:
+
+            - 'Consent to application'
+            - 'Add delegated permission grant'
+            - 'Add app role assignment'
+
+
+    suspicious_permissions:
+
+        Permission|contains:
+
+            - 'Mail.Read'
+            - 'Files.Read'
+            - 'Directory.ReadWrite.All'
+            - 'User.ReadWrite.All'
+            - 'Application.ReadWrite.All'
+
+
+    condition:
+
+        consent_event and suspicious_permissions
+
+
+
+falsepositives:
+
+    - Approved enterprise applications
+    - SaaS integrations
+
+
+level:
+
+    high
