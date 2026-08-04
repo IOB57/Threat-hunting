@@ -1,0 +1,79 @@
+title: Certutil Download Followed By Payload Execution
+id: 8c7d91a2-2f44-4f83-a911-6d7b5c992177
+
+status: experimental
+
+description:
+    Detects usage of certutil to download remote files followed by execution of the downloaded payload.
+
+author:
+    Detection Engineering Lab
+
+date: 2026/08/04
+
+references:
+    - https://attack.mitre.org/techniques/T1105/
+
+tags:
+    - attack.command_and_scripting_interpreter
+    - attack.defense_evasion
+    - attack.t1105
+    - attack.t1218
+
+
+logsource:
+
+    product: windows
+    category: process_creation
+
+
+detection:
+
+
+    certutil_download:
+
+        Image|endswith:
+
+            - '\certutil.exe'
+
+
+        CommandLine|contains:
+
+            - '-urlcache'
+            - '-split'
+            - 'http://'
+            - 'https://'
+
+
+    execution:
+
+        ParentImage|endswith:
+
+            - '\certutil.exe'
+
+
+        Image|endswith:
+
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\rundll32.exe'
+            - '\mshta.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+
+
+    condition:
+
+        certutil_download or execution
+
+
+
+falsepositives:
+
+    - Certificate management scripts
+    - Enterprise PKI operations
+
+
+level:
+
+    high
