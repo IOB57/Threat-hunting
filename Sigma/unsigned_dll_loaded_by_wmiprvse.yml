@@ -1,0 +1,69 @@
+title: Unsigned DLL Loaded By WMI Provider Host
+id: 7ab4c2d8-6d21-4f12-b8f1-8a1f7c4d9912
+
+status: experimental
+
+description:
+    Detects unsigned DLL files loaded by WMI Provider Host which may indicate malicious WMI provider registration.
+
+author:
+    Detection Engineering Lab
+
+date: 2026/08/04
+
+
+tags:
+
+    - attack.persistence
+    - attack.defense_evasion
+    - attack.t1574
+
+
+logsource:
+
+    product: windows
+    service: sysmon
+
+
+detection:
+
+
+    selection:
+
+        EventID: 7
+
+        Image|endswith:
+
+            - '\wmiprvse.exe'
+
+
+    suspicious_path:
+
+        ImageLoaded|contains:
+
+            - '\Users\'
+            - '\Temp\'
+            - '\Downloads\'
+            - '\AppData\'
+            - '\ProgramData\'
+
+
+    unsigned:
+
+        Signed: false
+
+
+    condition:
+
+        selection and suspicious_path and unsigned
+
+
+falsepositives:
+
+    - Third party WMI providers
+    - Monitoring agents
+
+
+level:
+
+    high
