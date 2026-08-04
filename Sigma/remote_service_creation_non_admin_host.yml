@@ -1,0 +1,45 @@
+title: Remote Service Creation From Unusual Workstation
+id: a72d9f32-92a7-4d0d-8d8a-8c77a4a5f921
+status: experimental
+
+description:
+    Detects Windows service creation events where the source host is not an approved administration server.
+
+author: Detection Engineering Lab
+date: 2026/08/04
+
+tags:
+    - attack.lateral_movement
+    - attack.t1021.002
+    - attack.persistence
+    - attack.t1543.003
+
+
+logsource:
+    product: windows
+    service: system
+
+
+detection:
+
+    service_creation:
+        EventID: 7045
+
+    suspicious_binary:
+        ImagePath|contains:
+            - 'powershell.exe'
+            - 'cmd.exe'
+            - 'rundll32.exe'
+            - 'regsvr32.exe'
+            - 'mshta.exe'
+
+    condition:
+        service_creation and suspicious_binary
+
+
+falsepositives:
+    - Software deployment systems
+    - SCCM
+    - Endpoint management tools
+
+level: high
