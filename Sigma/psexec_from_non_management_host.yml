@@ -1,0 +1,63 @@
+title: PsExec Execution From Non Administrative Host
+id: 9d7e2c81-6b44-49d2-b822-5f8a7c991288
+
+status: experimental
+
+description:
+    Detects PsExec usage originating from unusual workstations which may indicate lateral movement.
+
+author:
+    Detection Engineering Lab
+
+date:
+    2026/08/04
+
+
+tags:
+
+    - attack.lateral_movement
+    - attack.t1569.002
+
+
+logsource:
+
+    product: windows
+    category: process_creation
+
+
+
+detection:
+
+
+    psexec:
+
+        Image|endswith:
+
+            - '\psexec.exe'
+            - '\psexesvc.exe'
+
+
+    suspicious_arguments:
+
+        CommandLine|contains:
+
+            - '\\'
+            - '-accepteula'
+            - '-s'
+
+
+    condition:
+
+        psexec and suspicious_arguments
+
+
+
+falsepositives:
+
+    - System administrators
+    - Software deployment tools
+
+
+level:
+
+    high
