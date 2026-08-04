@@ -1,0 +1,73 @@
+title: Suspicious Administrative Share Enumeration
+id: 91c5b4d2-8a77-4c61-b9f3-2e7a5d881122
+
+status: experimental
+
+description:
+    Detects discovery of administrative shares commonly performed before lateral movement or ransomware deployment.
+
+author:
+    Detection Engineering Lab
+
+date:
+    2026/08/04
+
+references:
+    - https://attack.mitre.org/techniques/T1135/
+
+tags:
+    - attack.discovery
+    - attack.t1135
+
+
+logsource:
+    product: windows
+    category: process_creation
+
+
+detection:
+
+
+    command_discovery:
+
+        Image|endswith:
+
+            - '\net.exe'
+            - '\net1.exe'
+
+
+        CommandLine|contains:
+
+            - 'view'
+            - 'use'
+            - '\\'
+
+
+    powershell_discovery:
+
+        Image|endswith:
+
+            - '\powershell.exe'
+
+
+        CommandLine|contains:
+
+            - 'Get-SmbShare'
+            - 'Get-ChildItem \\'
+            - 'net view'
+
+
+    condition:
+
+        command_discovery or powershell_discovery
+
+
+falsepositives:
+
+    - Administrative scripts
+    - IT inventory tools
+
+
+level:
+
+    medium
