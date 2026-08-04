@@ -1,0 +1,64 @@
+title: Registry Run Key Modification By Script Interpreter
+id: 3a7f8d21-55c2-41b8-a7d4-9e2f6c881944
+
+status: experimental
+
+description:
+    Detects persistence attempts where scripting engines modify Windows autorun registry locations.
+
+author:
+    Detection Engineering Lab
+
+date:
+    2026/08/04
+
+
+tags:
+
+    - attack.persistence
+    - attack.t1547.001
+
+
+logsource:
+
+    product: windows
+    category: registry_event
+
+
+
+detection:
+
+
+    run_key:
+
+        TargetObject|contains:
+
+            - '\Software\Microsoft\Windows\CurrentVersion\Run'
+            - '\Software\Microsoft\Windows\CurrentVersion\RunOnce'
+
+
+    script_parent:
+
+        Image|endswith:
+
+            - '\powershell.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+
+
+    condition:
+
+        run_key and script_parent
+
+
+
+falsepositives:
+
+    - Software installers
+    - Enterprise deployment scripts
+
+
+level:
+
+    high
