@@ -1,0 +1,47 @@
+title: LSASS Memory Access By Unusual Signed Binary
+id: 6f2f6bde-1a52-4f91-a4c7-7d2c3f7c11dd
+status: experimental
+description: Detects processes accessing LSASS memory from uncommon signed binaries. Attackers may abuse trusted utilities for credential dumping.
+author: Detection Engineering Lab
+date: 2026/08/04
+
+references:
+    - https://attack.mitre.org/techniques/T1003/001/
+
+tags:
+    - attack.credential_access
+    - attack.t1003.001
+
+logsource:
+    product: windows
+    service: sysmon
+
+detection:
+
+    selection:
+        EventID: 10
+        TargetImage|endswith:
+            - '\lsass.exe'
+
+    suspicious_access:
+        GrantedAccess|contains:
+            - '0x1010'
+            - '0x1410'
+            - '0x1fffff'
+
+    filter_known:
+        SourceImage|startswith:
+            - 'C:\Program Files\Microsoft Defender'
+            - 'C:\Program Files\SentinelOne'
+            - 'C:\Program Files\CrowdStrike'
+
+    condition:
+        selection and suspicious_access and not filter_known
+
+
+falsepositives:
+    - EDR products
+    - Antivirus engines
+    - Incident response tools
+
+level: high
