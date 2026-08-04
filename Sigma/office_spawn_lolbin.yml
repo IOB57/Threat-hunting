@@ -1,0 +1,69 @@
+title: Office Application Spawned LOLBin
+id: 4f6a1c77-2d3b-44f9-b8c3-6f7a9e2d5518
+
+status: experimental
+
+description:
+    Detects Microsoft Office applications launching LOLBins commonly used during phishing attacks.
+
+author:
+    Detection Engineering Lab
+
+date: 2026/08/04
+
+
+tags:
+
+    - attack.execution
+    - attack.defense_evasion
+    - attack.t1218
+
+
+logsource:
+
+    product: windows
+    category: process_creation
+
+
+
+detection:
+
+
+    office_parent:
+
+        ParentImage|endswith:
+
+            - '\WINWORD.EXE'
+            - '\EXCEL.EXE'
+            - '\POWERPNT.EXE'
+            - '\OUTLOOK.EXE'
+
+
+    lolbin_child:
+
+        Image|endswith:
+
+            - '\powershell.exe'
+            - '\cmd.exe'
+            - '\mshta.exe'
+            - '\rundll32.exe'
+            - '\regsvr32.exe'
+            - '\installutil.exe'
+            - '\wmic.exe'
+
+
+    condition:
+
+        office_parent and lolbin_child
+
+
+
+falsepositives:
+
+    - Office macros used internally
+    - Administrative templates
+
+
+level:
+
+    high
