@@ -1,0 +1,280 @@
+<Sysmon schemaversion="4.90">
+
+    <!--
+        Threat Hunting Sysmon Configuration
+        Author: IO
+        Purpose:
+          - Threat Hunting
+          - Detection Engineering
+          - ATT&CK telemetry
+          - Adversary Emulation validation
+
+        Design principles:
+          1. Prioritize high-value telemetry.
+          2. Capture LOLBins and suspicious execution chains.
+          3. Capture persistence mechanisms.
+          4. Capture credential-access related activity.
+          5. Capture WMI persistence.
+          6. Keep the configuration suitable for a hunting lab.
+    -->
+
+    <HashAlgorithms>SHA256,IMPHASH</HashAlgorithms>
+
+    <CheckRevocation>true</CheckRevocation>
+
+    <EventFiltering>
+
+        <!-- PROCESS CREATION - Event ID 1 -->
+
+
+        <ProcessCreate onmatch="include">
+
+            <!-- PowerShell -->
+            <Image condition="end with">\powershell.exe</Image>
+            <Image condition="end with">\pwsh.exe</Image>
+
+            <!-- Windows command interpreters -->
+            <Image condition="end with">\cmd.exe</Image>
+
+            <!-- LOLBins -->
+            <Image condition="end with">\rundll32.exe</Image>
+            <Image condition="end with">\regsvr32.exe</Image>
+            <Image condition="end with">\mshta.exe</Image>
+            <Image condition="end with">\wmic.exe</Image>
+            <Image condition="end with">\cscript.exe</Image>
+            <Image condition="end with">\wscript.exe</Image>
+            <Image condition="end with">\msbuild.exe</Image>
+            <Image condition="end with">\installutil.exe</Image>
+            <Image condition="end with">\regasm.exe</Image>
+            <Image condition="end with">\regsvcs.exe</Image>
+            <Image condition="end with">\certutil.exe</Image>
+            <Image condition="end with">\bitsadmin.exe</Image>
+            <Image condition="end with">\cmstp.exe</Image>
+            <Image condition="end with">\msiexec.exe</Image>
+
+            <!-- Windows management -->
+            <Image condition="end with">\wmiprvse.exe</Image>
+            <Image condition="end with">\winrs.exe</Image>
+
+            <!-- Remote administration -->
+            <Image condition="end with">\psexec.exe</Image>
+            <Image condition="end with">\psexesvc.exe</Image>
+
+            <!-- Scripting -->
+            <Image condition="end with">\mshta.exe</Image>
+
+            <!-- Discovery -->
+            <Image condition="end with">\net.exe</Image>
+            <Image condition="end with">\net1.exe</Image>
+            <Image condition="end with">\whoami.exe</Image>
+            <Image condition="end with">\ipconfig.exe</Image>
+            <Image condition="end with">\systeminfo.exe</Image>
+            <Image condition="end with">\tasklist.exe</Image>
+            <Image condition="end with">\quser.exe</Image>
+            <Image condition="end with">\qwinsta.exe</Image>
+            <Image condition="end with">\nltest.exe</Image>
+            <Image condition="end with">\dsquery.exe</Image>
+
+        </ProcessCreate>
+
+        <!-- NETWORK CONNECTION - Event ID 3  -->
+
+
+        <NetworkConnect onmatch="include">
+
+            <Image condition="end with">\powershell.exe</Image>
+            <Image condition="end with">\pwsh.exe</Image>
+            <Image condition="end with">\cmd.exe</Image>
+
+            <Image condition="end with">\rundll32.exe</Image>
+            <Image condition="end with">\regsvr32.exe</Image>
+            <Image condition="end with">\mshta.exe</Image>
+            <Image condition="end with">\wmiprvse.exe</Image>
+            <Image condition="end with">\wscript.exe</Image>
+            <Image condition="end with">\cscript.exe</Image>
+
+            <Image condition="end with">\certutil.exe</Image>
+            <Image condition="end with">\bitsadmin.exe</Image>
+
+            <Image condition="end with">\psexec.exe</Image>
+            <Image condition="end with">\psexesvc.exe</Image>
+
+        </NetworkConnect>
+
+        <!-- IMAGE LOAD - Event ID 7 -->
+
+        <!--
+            ImageLoad is intentionally restricted to high-value
+            processes because unrestricted Event ID 7 can be noisy.
+        -->
+
+        <ImageLoad onmatch="include">
+
+            <Image condition="end with">\lsass.exe</Image>
+            <Image condition="end with">\winlogon.exe</Image>
+            <Image condition="end with">\services.exe</Image>
+            <Image condition="end with">\svchost.exe</Image>
+            <Image condition="end with">\wmiprvse.exe</Image>
+            <Image condition="end with">\dllhost.exe</Image>
+
+        </ImageLoad>
+
+        <!-- PROCESS ACCESS - Event ID 10 -->
+
+        <!--
+            Focus on access to LSASS.
+            Useful for credential dumping investigations.
+        -->
+
+        <ProcessAccess onmatch="include">
+
+            <TargetImage condition="end with">\lsass.exe</TargetImage>
+
+        </ProcessAccess>
+
+        <!-- FILE CREATE - Event ID 11 -->
+
+        <FileCreate onmatch="include">
+
+            <!-- Startup persistence -->
+            <TargetFilename condition="contains">\Startup\</TargetFilename>
+
+            <!-- Common staging locations -->
+            <TargetFilename condition="contains">\AppData\Roaming\</TargetFilename>
+            <TargetFilename condition="contains">\AppData\Local\Temp\</TargetFilename>
+            <TargetFilename condition="contains">\Windows\Temp\</TargetFilename>
+
+            <!-- ProgramData is frequently abused for payload staging -->
+            <TargetFilename condition="contains">\ProgramData\</TargetFilename>
+
+            <!-- Scheduled task locations -->
+            <TargetFilename condition="contains">\Windows\System32\Tasks\</TargetFilename>
+
+            <!-- Web/application directories -->
+            <TargetFilename condition="contains">\inetpub\wwwroot\</TargetFilename>
+
+        </FileCreate>
+
+        <!-- REGISTRY EVENTS - Event ID 12/13/14 -->
+
+        <RegistryEvent onmatch="include">
+
+            <!-- Run / RunOnce persistence -->
+            <TargetObject condition="contains">\Software\Microsoft\Windows\CurrentVersion\Run</TargetObject>
+            <TargetObject condition="contains">\Software\Microsoft\Windows\CurrentVersion\RunOnce</TargetObject>
+
+            <!-- IFEO -->
+            <TargetObject condition="contains">\Image File Execution Options\</TargetObject>
+
+            <!-- SilentProcessExit -->
+            <TargetObject condition="contains">\SilentProcessExit\</TargetObject>
+
+            <!-- AppInit DLL -->
+            <TargetObject condition="contains">\Windows\AppInit_DLLs</TargetObject>
+
+            <!-- Services -->
+            <TargetObject condition="contains">\System\CurrentControlSet\Services\</TargetObject>
+
+            <!-- Winlogon -->
+            <TargetObject condition="contains">\Microsoft\Windows NT\CurrentVersion\Winlogon</TargetObject>
+
+            <!-- LSA -->
+            <TargetObject condition="contains">\Control\Lsa</TargetObject>
+
+        </RegistryEvent>
+
+        <!-- WMI EVENT FILTER - Event ID 19 -->
+
+        <!--
+            Permanent WMI event subscription.
+            Extremely useful for persistence hunting.
+        -->
+
+        <WmiEventFilter onmatch="include"/>
+
+        <!-- WMI EVENT CONSUMER - Event ID 20   -->
+
+        <WmiEventConsumer onmatch="include"/>
+
+        <!-- WMI FILTER/CONSUMER BINDING - Event ID 21 -->
+
+
+        <WmiEventConsumerToFilter onmatch="include"/>
+
+        <!-- DNS QUERY - Event ID 22  -->
+
+
+        <DnsQuery onmatch="include">
+
+            <Image condition="end with">\powershell.exe</Image>
+            <Image condition="end with">\pwsh.exe</Image>
+            <Image condition="end with">\rundll32.exe</Image>
+            <Image condition="end with">\regsvr32.exe</Image>
+            <Image condition="end with">\mshta.exe</Image>
+            <Image condition="end with">\wmiprvse.exe</Image>
+            <Image condition="end with">\wscript.exe</Image>
+            <Image condition="end with">\cscript.exe</Image>
+
+        </DnsQuery>
+
+        <!-- DRIVER LOAD - Event ID 6 -->
+
+        <DriverLoad onmatch="include">
+
+            <Signature condition="is">Unsigned</Signature>
+
+        </DriverLoad>
+
+        <!-- FILE CREATE STREAM HASH - Event ID 15 -->
+
+        <FileCreateStreamHash onmatch="include">
+
+            <TargetFilename condition="contains">\Downloads\</TargetFilename>
+            <TargetFilename condition="contains">\AppData\</TargetFilename>
+            <TargetFilename condition="contains">\Temp\</TargetFilename>
+
+        </FileCreateStreamHash>
+
+        <!-- PIPE CREATED - Event ID 17 -->
+
+        <PipeEvent onmatch="include">
+
+            <PipeName condition="contains">postex</PipeName>
+            <PipeName condition="contains">msagent</PipeName>
+            <PipeName condition="contains">status_</PipeName>
+
+        </PipeEvent>
+
+        <!-- PIPE CONNECTED - Event ID 18 -->
+
+        <PipeEvent onmatch="include">
+
+            <PipeName condition="contains">postex</PipeName>
+            <PipeName condition="contains">msagent</PipeName>
+            <PipeName condition="contains">status_</PipeName>
+
+        </PipeEvent>
+
+        <!-- FILE DELETE - Event ID 23 -->
+
+        <FileDelete onmatch="include">
+
+            <TargetFilename condition="contains">\Temp\</TargetFilename>
+            <TargetFilename condition="contains">\ProgramData\</TargetFilename>
+            <TargetFilename condition="contains">\AppData\</TargetFilename>
+
+        </FileDelete>
+    
+        <!-- FILE DELETE DETECTED - Event ID 26 -->
+
+        <FileDeleteDetected onmatch="include">
+
+            <TargetFilename condition="contains">\Temp\</TargetFilename>
+            <TargetFilename condition="contains">\ProgramData\</TargetFilename>
+
+        </FileDeleteDetected>
+
+
+    </EventFiltering>
+
+</Sysmon>
