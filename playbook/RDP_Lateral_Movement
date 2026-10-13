@@ -1,0 +1,37 @@
+
+```markdown
+# Suspicious RDP Lateral Movement
+
+## MITRE ATT&CK
+
+- T1021.001 — RDP
+- T1078 — Valid Accounts
+
+## Detection
+
+Look for:
+
+- Security 4624
+- Logon Type 10
+- unusual source workstation
+- privileged account
+- first-time connection
+- multiple hosts
+- subsequent process creation
+
+## Hunt
+
+```text
+Source Host
+     |
+     v
+RDP Logon
+     |
+     v
+Privileged Account
+     |
+     v
+New Process
+     |
+     v
+Credential / Discovery Activity
