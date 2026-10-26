@@ -1,0 +1,18 @@
+
+DeviceProcessEvents
+| where Timestamp > ago(7d)
+| where FileName in~ ("schtasks.exe", "powershell.exe", "pwsh.exe")
+| where ProcessCommandLine has_any (
+    "/create",
+    "Register-ScheduledTask",
+    "New-ScheduledTask"
+)
+| project
+    Timestamp,
+    DeviceName,
+    AccountName,
+    FileName,
+    ProcessCommandLine,
+    InitiatingProcessFileName,
+    InitiatingProcessCommandLine
+| order by Timestamp desc
