@@ -1,0 +1,24 @@
+
+DeviceProcessEvents
+| where Timestamp > ago(7d)
+| where FileName in~ (
+    "mshta.exe",
+    "rundll32.exe",
+    "regsvr32.exe",
+    "certutil.exe",
+    "msiexec.exe",
+    "installutil.exe",
+    "regasm.exe",
+    "cmstp.exe"
+)
+| project
+    Timestamp,
+    DeviceName,
+    AccountName,
+    FileName,
+    ProcessCommandLine,
+    InitiatingProcessFileName,
+    InitiatingProcessCommandLine,
+    FolderPath,
+    SHA256
+| order by Timestamp desc
