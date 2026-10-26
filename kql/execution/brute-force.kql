@@ -1,0 +1,13 @@
+
+DeviceLogonEvents
+| where Timestamp > ago(24h)
+| where ActionType =~ "LogonFailed"
+| summarize
+    FailedAttempts = count(),
+    TargetAccounts = dcount(AccountName),
+    FirstSeen = min(Timestamp),
+    LastSeen = max(Timestamp),
+    Accounts = make_set(AccountName, 20)
+    by DeviceName, RemoteIP, bin(Timestamp, 15m)
+| where FailedAttempts >= 10 or TargetAccounts >= 5
+| order by FailedAttempts desc
