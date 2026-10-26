@@ -1,0 +1,13 @@
+
+DeviceEvents
+| where Timestamp > ago(7d)
+| where AdditionalFields has "lsass.exe"
+| summarize
+    Events = count(),
+    FirstSeen = min(Timestamp),
+    LastSeen = max(Timestamp),
+    SampleActions = make_set(ActionType, 20)
+    by DeviceName, InitiatingProcessFileName,
+       InitiatingProcessCommandLine,
+       InitiatingProcessAccountName
+| order by Events desc
