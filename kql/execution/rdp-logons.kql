@@ -1,0 +1,14 @@
+
+DeviceLogonEvents
+| where Timestamp > ago(7d)
+| where LogonType =~ "RemoteInteractive"
+| where ActionType =~ "LogonSuccess"
+| project
+    Timestamp,
+    DeviceName,
+    AccountDomain,
+    AccountName,
+    RemoteIP,
+    LogonType,
+    ActionType
+| order by Timestamp desc
