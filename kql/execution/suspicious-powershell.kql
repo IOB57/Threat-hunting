@@ -1,0 +1,22 @@
+DeviceProcessEvents
+| where Timestamp > ago(7d)
+| where FileName in~ ("powershell.exe", "pwsh.exe")
+| where ProcessCommandLine has_any (
+    "-enc", "-encodedcommand",
+    "FromBase64String",
+    "DownloadString",
+    "Invoke-WebRequest",
+    "WebClient",
+    "-WindowStyle Hidden",
+    "-ExecutionPolicy Bypass"
+)
+| project
+    Timestamp,
+    DeviceName,
+    AccountName,
+    FileName,
+    ProcessCommandLine,
+    InitiatingProcessFileName,
+    InitiatingProcessCommandLine,
+    SHA256
+| order by Timestamp desc
